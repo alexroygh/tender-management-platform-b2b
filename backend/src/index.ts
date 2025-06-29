@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/api/auth', authRouter);
+app.use('/api/tenders', tenderRouter);
 app.use('/api/search', searchRouter);
 
 app.get('/', (_req, res) => {
