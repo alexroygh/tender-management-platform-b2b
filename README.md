@@ -152,7 +152,7 @@ docker-compose up
 ### 10. Deployment
 - Deploy frontend to Vercel (recommended)
 - Deploy backend to Heroku, Render, or similar
-- Set environment variables in your deployment platform
+- Set environment variables in deployment platform
 
 ---
 
