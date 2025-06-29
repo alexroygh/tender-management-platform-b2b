@@ -1,6 +1,19 @@
 import { GetServerSideProps } from 'next';
 import { parseCookies } from '../utils/parseCookies';
 import { useState } from 'react';
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Grid,
+  Alert,
+  InputAdornment
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function Search({ initialResults, error }: any) {
   const [name, setName] = useState('');
@@ -8,9 +21,10 @@ export default function Search({ initialResults, error }: any) {
   const [goods, setGoods] = useState('');
   const [results, setResults] = useState<any[]>(initialResults || []);
   const [formError, setFormError] = useState(error || '');
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault(); setFormError('');
+    e.preventDefault(); setFormError(''); setLoading(true);
     const token = localStorage.getItem('token');
     const params = new URLSearchParams();
     if (name) params.append('name', name);
@@ -20,31 +34,65 @@ export default function Search({ initialResults, error }: any) {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
+    setLoading(false);
     if (!res.ok) { setFormError(data.message || 'Search failed'); return; }
     setResults(data);
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: 'auto', padding: 32 }}>
-      <h2>Search Companies</h2>
-      <form onSubmit={handleSearch} style={{ marginBottom: 16 }}>
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="Name" style={{ marginRight: 8 }} />
-        <input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="Industry" style={{ marginRight: 8 }} />
-        <input value={goods} onChange={e => setGoods(e.target.value)} placeholder="Goods/Services" style={{ marginRight: 8 }} />
-        <button type="submit">Search</button>
-      </form>
-      {formError && <div style={{ color: 'red', marginBottom: 8 }}>{formError}</div>}
-      <ul>
-        {results.map((c: any) => (
-          <li key={c.id} style={{ marginBottom: 16 }}>
-            <b>{c.name}</b> ({c.industry})<br />
-            {c.description}<br />
-            <a href={`/company?id=${c.id}`}>View Company</a>
-          </li>
-        ))}
-      </ul>
-      <a href="/dashboard">Back to Dashboard</a>
-    </div>
+    <Container maxWidth="md" sx={{ mt: 6 }}>
+      <Typography variant="h4" gutterBottom>Search Companies</Typography>
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+            <TextField
+              label="Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
+              sx={{ flex: 1, minWidth: 180 }}
+            />
+            <TextField
+              label="Industry"
+              value={industry}
+              onChange={e => setIndustry(e.target.value)}
+              sx={{ flex: 1, minWidth: 180 }}
+            />
+            <TextField
+              label="Goods/Services"
+              value={goods}
+              onChange={e => setGoods(e.target.value)}
+              sx={{ flex: 1, minWidth: 180 }}
+            />
+            <Button type="submit" variant="contained" color="primary" sx={{ height: 56, minWidth: 120 }} startIcon={<SearchIcon />} disabled={loading}>
+              {loading ? 'Searching...' : 'Search'}
+            </Button>
+          </Box>
+          {formError && <Alert severity="error" sx={{ mt: 2 }}>{formError}</Alert>}
+        </CardContent>
+      </Card>
+      <Grid container spacing={2}>
+        {results.length === 0 ? (
+          <Grid item xs={12}><Typography>No companies found.</Typography></Grid>
+        ) : (
+          results.map((c: any) => (
+            <Grid item xs={12} sm={6} md={4} key={c.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{c.name}</Typography>
+                  <Typography color="text.secondary">{c.industry}</Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>{c.description}</Typography>
+                  <Button href={`/company?id=${c.id}`} variant="outlined" sx={{ mt: 2 }}>View Company</Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        )}
+      </Grid>
+      <Box mt={4}>
+        <Button href="/dashboard" variant="outlined">Back to Dashboard</Button>
+      </Box>
+    </Container>
   );
 }
 

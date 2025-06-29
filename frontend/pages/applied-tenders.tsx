@@ -1,26 +1,71 @@
 import { GetServerSideProps } from 'next';
 import { parseCookies } from '../utils/parseCookies';
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  Alert,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  TableContainer
+} from '@mui/material';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
 export default function AppliedTenders({ applications, error }: any) {
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!applications) return <div>Loading...</div>;
+  if (error) return (
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Alert severity="error">{error}</Alert>
+      <Box mt={2}><Button href="/dashboard" variant="outlined">Back to Dashboard</Button></Box>
+    </Container>
+  );
+  if (!applications) return (
+    <Container maxWidth="sm" sx={{ mt: 8 }}><Typography>Loading...</Typography></Container>
+  );
   return (
-    <div style={{ maxWidth: 800, margin: 'auto', padding: 32 }}>
-      <h2>Applied Tenders</h2>
+    <Container maxWidth="md" sx={{ mt: 6 }}>
+      <Typography variant="h4" gutterBottom>Applied Tenders</Typography>
       {applications.length === 0 ? (
-        <div>You have not applied to any tenders yet.</div>
+        <Alert severity="info" sx={{ mb: 4 }}>You have not applied to any tenders yet.</Alert>
       ) : (
-        <ul>
-          {applications.map((app: any) => (
-            <li key={app.id} style={{ marginBottom: 16 }}>
-              <strong>{app.tender_title}</strong> (Deadline: {app.tender_deadline})<br />
-              Proposal: {app.proposal}
-            </li>
-          ))}
-        </ul>
+        <TableContainer component={Paper} sx={{ mb: 4 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><b>Tender Title</b></TableCell>
+                <TableCell><b>Deadline</b></TableCell>
+                <TableCell><b>Proposal</b></TableCell>
+                <TableCell align="center"><b>Action</b></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {applications.map((app: any) => (
+                <TableRow key={app.id}>
+                  <TableCell>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <AssignmentTurnedInIcon color="primary" fontSize="small" />
+                      <Typography variant="subtitle1">{app.tender_title}</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>{app.tender_deadline}</TableCell>
+                  <TableCell>{app.proposal}</TableCell>
+                  <TableCell align="center">
+                    <Button href={`/tender/${app.tender_id || ''}`} variant="outlined" size="small">View Tender</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-      <a href="/dashboard">Back to Dashboard</a>
-    </div>
+      <Box mt={4}>
+        <Button href="/dashboard" variant="outlined">Back to Dashboard</Button>
+      </Box>
+    </Container>
   );
 }
 

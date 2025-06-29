@@ -1,5 +1,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Alert
+} from '@mui/material';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -10,50 +20,51 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!email || !password) {
-      setError('Email and password are required');
-      return;
-    }
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.message || 'Login failed');
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      document.cookie = `token=${data.token}; path=/`;
+      router.push('/dashboard');
+    } else {
+      const err = await res.json();
+      setError(err.message || 'Login failed');
     }
-    // Store JWT in localStorage and as a cookie for SSR
-    localStorage.setItem('token', data.token);
-    document.cookie = `token=${data.token}; path=/;`;
-    router.push('/dashboard');
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 32 }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{ width: '100%', marginBottom: 8 }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          style={{ width: '100%', marginBottom: 8 }}
-        />
-        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-        <button type="submit" style={{ width: '100%' }}>Login</button>
-      </form>
-      <p>Don't have an account? <a href="/signup">Sign up</a></p>
-    </div>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Card>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>Login</Typography>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              fullWidth
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              fullWidth
+            />
+            <Button type="submit" variant="contained" color="primary" fullWidth>Login</Button>
+          </Box>
+          <Box mt={2}>
+            <Button href="/signup" color="secondary">Don&apos;t have an account? Sign up</Button>
+          </Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

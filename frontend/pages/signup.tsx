@@ -1,61 +1,72 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Alert
+} from '@mui/material';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!email || !password) {
-      setError('Email and password are required');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+    setSuccess('');
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.message || 'Signup failed');
-      return;
+    if (res.ok) {
+      setSuccess('Signup successful! You can now log in.');
+      setTimeout(() => router.push('/login'), 1500);
+    } else {
+      const err = await res.json();
+      setError(err.message || 'Signup failed');
     }
-    localStorage.setItem('token', data.token);
-    router.push('/dashboard');
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto', padding: 32 }}>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{ width: '100%', marginBottom: 8 }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          style={{ width: '100%', marginBottom: 8 }}
-        />
-        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-        <button type="submit" style={{ width: '100%' }}>Sign Up</button>
-      </form>
-      <p>Already have an account? <a href="/login">Login</a></p>
-    </div>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Card>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>Sign Up</Typography>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              fullWidth
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              fullWidth
+            />
+            <Button type="submit" variant="contained" color="primary" fullWidth>Sign Up</Button>
+          </Box>
+          <Box mt={2}>
+            <Button href="/login" color="secondary">Already have an account? Log in</Button>
+          </Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

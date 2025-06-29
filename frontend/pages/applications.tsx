@@ -1,28 +1,52 @@
+import { useEffect, useState } from 'react';
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  Grid,
+  Alert
+} from '@mui/material';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from '../utils/parseCookies';
 import { useRouter } from 'next/router';
 
-export default function Applications({ applications, error }: any) {
+export default function Applications() {
+  const [applications, setApplications] = useState<any[]>([]);
+  const [error, setError] = useState('');
   const router = useRouter();
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!applications) return <div>Loading...</div>;
+
+  useEffect(() => {
+    fetch('/api/applications')
+      .then(res => res.json())
+      .then(setApplications)
+      .catch(() => setError('Failed to fetch applications'));
+  }, []);
+
   return (
-    <div style={{ maxWidth: 800, margin: 'auto', padding: 32 }}>
-      <h2>Applications for Tender {router.query.tenderId}</h2>
-      <a href="/dashboard">Back to Dashboard</a>
-      <ul style={{ marginTop: 24 }}>
+    <Container maxWidth="md" sx={{ mt: 6 }}>
+      <Typography variant="h4" gutterBottom>Applications</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      <Grid container spacing={2}>
         {applications.length === 0 ? (
-          <li>No applications found for this tender.</li>
+          <Grid item xs={12}><Typography>No applications found.</Typography></Grid>
         ) : (
           applications.map((app: any) => (
-            <li key={app.id} style={{ marginBottom: 16 }}>
-              <b>Company ID:</b> {app.company_id}<br />
-              <b>Proposal:</b> {app.proposal}<br />
-            </li>
+            <Grid item xs={12} sm={6} md={4} key={app.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="subtitle1" fontWeight={600}>Tender: {app.tender_title || app.tender_id}</Typography>
+                  <Typography color="text.secondary" variant="body2">Proposal: {app.proposal}</Typography>
+                  <Typography color="text.secondary" variant="body2">Company: {app.company_id}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           ))
         )}
-      </ul>
-    </div>
+      </Grid>
+    </Container>
   );
 }
 
