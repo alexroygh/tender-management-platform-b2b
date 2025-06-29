@@ -20,6 +20,7 @@ app.use(cors());
 app.use('/api/auth', authRouter);
 app.use('/api/companies', companyRouter);
 app.use('/api/tenders', tenderRouter);
+app.use('/api/applications', applicationRouter);
 app.use('/api/search', searchRouter);
 
 app.get('/', (_req, res) => {
