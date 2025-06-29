@@ -49,7 +49,10 @@ export default function Dashboard({ company, tenders, error }: any) {
         </Card>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Typography variant="h5">Your Tenders</Typography>
-          <Button href="/tenders" variant="contained" startIcon={<AddIcon />}>Create/View Tenders</Button>
+          <Stack direction="row" spacing={2}>
+            <Button href="/tenders" variant="contained" startIcon={<AddIcon />}>Create/View Tenders</Button>
+            <Button href="/applied-tenders" variant="contained" color="secondary" startIcon={<AssignmentTurnedInIcon />}>Applied Tenders</Button>
+          </Stack>
         </Box>
         <Grid container spacing={2}>
           {tenders.length === 0 ? (
