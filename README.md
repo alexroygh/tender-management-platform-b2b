@@ -11,7 +11,7 @@ A robust B2B tender-management platform where companies can:
 
 ## Tech Stack
 - **Frontend:** Next.js (TypeScript, MUI for UI)
-- **Backend:** Express.js (TypeScript)
+- **Backend:** Express.js (TypeScript, Knex.js for DB access)
 - **Database:** PostgreSQL
 - **Storage:** Supabase Storage (for company logos)
 - **Auth:** JWT (stateless, secure)
@@ -20,8 +20,7 @@ A robust B2B tender-management platform where companies can:
 ## Monorepo Structure
 ```
 frontend/   # Next.js app (UI, SSR/SSG, MUI)
-backend/    # Express.js app (API, JWT, Supabase integration)
-db/         # Database migrations, ERD, seed data
+backend/    # Express.js app (API, JWT, Supabase integration, Knex)
 ```
 
 ## Key Features
@@ -32,7 +31,7 @@ db/         # Database migrations, ERD, seed data
 - Applied tenders page for companies
 - SSR/SSG for fast, SEO-friendly pages
 - Modern, responsive UI with Material-UI (MUI)
-- Robust seed data and migrations
+- Robust seed data and migrations (via Knex)
 - Docker Compose for easy local setup
 - Row Level Security (RLS) on Supabase Storage (see troubleshooting)
 
@@ -78,22 +77,29 @@ cd tender-management-platform-b2b
    CREATE USER kibou WITH PASSWORD 'kiboupass';
    GRANT ALL PRIVILEGES ON DATABASE kibou TO kibou;
    ```
-4. Run the migration to create tables:
-   ```sh
-   psql -U kibou -d kibou -f db/migrations/001_init.sql
-   ```
-5. (Optional) Seed data:
-   ```sh
-   psql -U kibou -d kibou -f db/seed.sql
-   ```
 
-### 4. Supabase Storage Setup
+### 4. Run Migrations & Seed Data (Knex)
+All database schema and seed data are managed via Knex (TypeScript).
+
+- **Run migrations:**
+  ```sh
+  cd backend
+  npx knex migrate:latest --knexfile knexfile.ts
+  ```
+- **Run seeds:**
+  ```sh
+  npx knex seed:run --knexfile knexfile.ts
+  ```
+  - This will insert robust demo data for users, companies, tenders, applications, etc.
+  - **User passwords are securely hashed using bcrypt in the seed file.**
+
+### 5. Supabase Storage Setup
 - Go to [Supabase](https://app.supabase.com/), create a project.
 - Create a storage bucket named `company-logos`.
 - Enable Row Level Security (RLS) and add policies for authenticated users to upload/read/update/delete in this bucket.
 - Get your Supabase project URL and service role key.
 
-### 5. Environment Variables
+### 6. Environment Variables
 - Copy `.env.example` to `.env` in `backend/` and fill in:
   ```
   DATABASE_URL=postgres://kibou:kiboupass@localhost:5432/kibou
@@ -102,7 +108,7 @@ cd tender-management-platform-b2b
   SUPABASE_KEY=your_supabase_service_role_key
   ```
 
-### 6. Install Dependencies
+### 7. Install Dependencies
 #### Backend
 ```
 cd backend
@@ -114,7 +120,7 @@ cd ../frontend
 npm install
 ```
 
-### 7. Running the App
+### 8. Running the App
 #### With Docker Compose (Recommended)
 ```
 docker-compose up
@@ -137,7 +143,7 @@ docker-compose up
   ```
 - Visit [http://localhost:3000](http://localhost:3000)
 
-### 8. Usage
+### 9. Usage
 - Register a new user (Sign Up)
 - Complete your company profile (upload logo, add goods/services)
 - Create and publish tenders
@@ -145,11 +151,11 @@ docker-compose up
 - Search for companies
 - View applied tenders
 
-### 9. Environment Variables
+### 10. Environment Variables
 - All sensitive keys are stored in `backend/.env` (never commit this file)
 - Frontend uses `/api/*` proxy to backend (see `next.config.ts`)
 
-### 10. Deployment
+### 11. Deployment
 - Deploy frontend to Vercel (recommended)
 - Deploy backend to Heroku, Render, or similar
 - Set environment variables in deployment platform
