@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/api/auth', authRouter);
+app.use('/api/search', searchRouter);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Kibou B2B Tender Management API' });
