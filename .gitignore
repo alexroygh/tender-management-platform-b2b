@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.*
+backend/.env
+backend/.env.*
+
+# Build outputs
+frontend/.next/
+frontend/out/
+frontend/dist/
+backend/dist/
+
+# Editor folders
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+
+# Docker
+**/db_data/
+
+# Misc
+*.local
+
+# Ignore generated files
+*.tsbuildinfo 
