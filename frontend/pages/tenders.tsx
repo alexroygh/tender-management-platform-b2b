@@ -22,12 +22,21 @@ export default function Tenders() {
   const [budget, setBudget] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit] = useState(9); // 9 per page for 3x3 grid
+  const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    fetch('/api/tenders')
+    setLoading(true);
+    fetch(`/api/tenders?page=${page}&limit=${limit}`)
       .then(res => res.json())
-      .then(setTenders);
-  }, []);
+      .then(data => {
+        setTenders(data.tenders);
+        setTotal(data.total);
+        setLoading(false);
+      });
+  }, [page, limit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +63,8 @@ export default function Tenders() {
     return match ? match[1] : '';
   }
 
+  const totalPages = Math.ceil(total / limit);
+
   return (
     <Container maxWidth="md" sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom>Tenders</Typography>
@@ -72,7 +83,9 @@ export default function Tenders() {
         </CardContent>
       </Card>
       <Grid container spacing={2}>
-        {tenders.length === 0 ? (
+        {loading ? (
+          <Grid item xs={12}><Typography>Loading...</Typography></Grid>
+        ) : tenders.length === 0 ? (
           <Grid item xs={12}><Typography>No tenders found.</Typography></Grid>
         ) : (
           tenders.map((t: any) => (
@@ -89,6 +102,11 @@ export default function Tenders() {
           ))
         )}
       </Grid>
+      <Box display="flex" justifyContent="center" alignItems="center" mt={4} gap={2}>
+        <Button variant="outlined" onClick={() => setPage(page - 1)} disabled={page === 1 || loading}>Previous</Button>
+        <Typography>Page {page} of {totalPages || 1}</Typography>
+        <Button variant="outlined" onClick={() => setPage(page + 1)} disabled={page === totalPages || loading || totalPages === 0}>Next</Button>
+      </Box>
     </Container>
   );
 }
@@ -105,11 +123,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     };
   }
   try {
-    const tendersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/tenders`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const initialTenders = await tendersRes.json();
-    return { props: { initialTenders } };
+    // SSR will just return an empty list, client will fetch paginated
+    return { props: { initialTenders: [] } };
   } catch (err: any) {
     return { props: { error: err.message } };
   }

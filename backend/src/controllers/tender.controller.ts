@@ -6,8 +6,10 @@ import { Tender, UserCompanyMap } from '../models';
 export async function listTenders(req: Request, res: Response): Promise<void> {
   const { page = 1, limit = 10 } = req.query;
   const offset = ((Number(page) || 1) - 1) * (Number(limit) || 10);
+  const countResult = await knex<Tender>('tenders').count('id as count');
+  const count = (countResult[0] as any).count;
   const result = await knex<Tender>('tenders').orderBy('created_at', 'desc').limit(Number(limit)).offset(Number(offset));
-  res.json(result);
+  res.json({ tenders: result, total: Number(count) });
 }
 
 export async function listCompanyTenders(req: Request, res: Response): Promise<void> {
