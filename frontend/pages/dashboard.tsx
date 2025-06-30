@@ -31,7 +31,7 @@ export default function Dashboard({ company, tenders, error }: any) {
               <Grid item>
                 <Avatar src={company.logo_url} alt="Logo" sx={{ width: 80, height: 80 }} />
               </Grid>
-              <Grid item xs>
+              <Grid item xs={12}>
                 <Typography variant="h6">{company.name}</Typography>
                 <Typography color="text.secondary">{company.industry}</Typography>
                 <Typography sx={{ mt: 1 }}>{company.description}</Typography>
@@ -52,6 +52,7 @@ export default function Dashboard({ company, tenders, error }: any) {
           <Stack direction="row" spacing={2}>
             <Button href="/tenders" variant="contained" startIcon={<AddIcon />}>Create/View Tenders</Button>
             <Button href="/applied-tenders" variant="contained" color="secondary" startIcon={<AssignmentTurnedInIcon />}>Applied Tenders</Button>
+            <Button href="/search" variant="outlined">Search Companies</Button>
           </Stack>
         </Box>
         <Grid container spacing={2}>

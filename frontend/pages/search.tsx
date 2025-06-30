@@ -82,7 +82,7 @@ export default function Search({ initialResults, error }: any) {
                   <Typography variant="h6">{c.name}</Typography>
                   <Typography color="text.secondary">{c.industry}</Typography>
                   <Typography variant="body2" sx={{ mt: 1 }}>{c.description}</Typography>
-                  <Button href={`/company?id=${c.id}`} variant="outlined" sx={{ mt: 2 }}>View Company</Button>
+                  <Button href={`/company/${c.id}`} variant="outlined" sx={{ mt: 2 }}>View Company</Button>
                 </CardContent>
               </Card>
             </Grid>
