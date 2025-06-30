@@ -14,7 +14,8 @@ services:
 
   backend:
     build: ./backend
-    command: npm run dev
+    # Wait for db, run migrations & seeds, then start the server
+    command: sh -c "until pg_isready -h db -p 5432; do sleep 1; done && npx knex migrate:latest --knexfile knexfile.ts && npx knex seed:run --knexfile knexfile.ts && npm run dev"
     volumes:
       - ./backend:/app
     ports:
@@ -34,7 +35,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_API_URL: http://backend:4000
     depends_on:
       - backend
 
