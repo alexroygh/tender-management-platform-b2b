@@ -10,7 +10,21 @@ import {
   Alert
 } from '@mui/material';
 
-export default function TenderDetailsPage({ tender, error }: any) {
+type Tender = {
+  id: number;
+  title: string;
+  description: string;
+  deadline: string;
+  budget: number;
+  company_id: number;
+};
+
+interface TenderDetailsProps {
+  tender?: Tender;
+  error?: string;
+}
+
+export default function TenderDetailsPage({ tender, error }: TenderDetailsProps) {
   if (error) return (
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Alert severity="error">{error}</Alert>
@@ -37,7 +51,7 @@ export default function TenderDetailsPage({ tender, error }: any) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<TenderDetailsProps> = async (ctx) => {
   const { id } = ctx.query;
   const cookies = parseCookies(ctx.req.headers.cookie);
   const token = cookies.token;

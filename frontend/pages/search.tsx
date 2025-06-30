@@ -15,11 +15,25 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-export default function Search({ initialResults, error }: any) {
+type Company = {
+  id: number;
+  name: string;
+  industry: string;
+  description: string;
+  goods_and_services: string[];
+  logo_url?: string;
+};
+
+interface SearchProps {
+  initialResults: Company[];
+  error?: string;
+}
+
+export default function Search({ initialResults, error }: SearchProps) {
   const [name, setName] = useState('');
   const [industry, setIndustry] = useState('');
   const [goods, setGoods] = useState('');
-  const [results, setResults] = useState<any[]>(initialResults || []);
+  const [results, setResults] = useState<Company[]>(initialResults || []);
   const [formError, setFormError] = useState(error || '');
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +50,7 @@ export default function Search({ initialResults, error }: any) {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) { setFormError(data.message || 'Search failed'); return; }
-    setResults(data);
+    setResults(data as Company[]);
   };
 
   return (
@@ -75,7 +89,7 @@ export default function Search({ initialResults, error }: any) {
         {results.length === 0 ? (
           <Grid item xs={12}><Typography>No companies found.</Typography></Grid>
         ) : (
-          results.map((c: any) => (
+          results.map((c: Company) => (
             <Grid item xs={12} sm={6} md={4} key={c.id}>
               <Card>
                 <CardContent>
@@ -96,7 +110,7 @@ export default function Search({ initialResults, error }: any) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<SearchProps> = async (ctx) => {
   const cookies = parseCookies(ctx.req.headers.cookie);
   const token = cookies.token;
   if (!token) {

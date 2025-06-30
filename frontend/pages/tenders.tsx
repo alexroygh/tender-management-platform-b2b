@@ -14,8 +14,17 @@ import AddIcon from '@mui/icons-material/Add';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from '../utils/parseCookies';
 
+type Tender = {
+  id: number;
+  title: string;
+  description: string;
+  deadline: string;
+  budget: number;
+  company_id: number;
+};
+
 export default function Tenders() {
-  const [tenders, setTenders] = useState<any[]>([]);
+  const [tenders, setTenders] = useState<Tender[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -88,7 +97,7 @@ export default function Tenders() {
         ) : tenders.length === 0 ? (
           <Grid item xs={12}><Typography>No tenders found.</Typography></Grid>
         ) : (
-          tenders.map((t: any) => (
+          tenders.map((t: Tender) => (
             <Grid item xs={12} sm={6} md={4} key={t.id}>
               <Card>
                 <CardContent>
