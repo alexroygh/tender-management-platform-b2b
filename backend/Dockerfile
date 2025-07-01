@@ -14,8 +14,8 @@ RUN npm install
 # Copy the rest of the backend source
 COPY . .
 
-# Build TypeScript (if needed)
-RUN npm run build || true
+# Build TypeScript
+RUN npm run build
 
 # Expose backend port
 EXPOSE 4000
