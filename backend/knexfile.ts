@@ -2,8 +2,6 @@ import type { Knex } from "knex";
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Update with your config settings.
-
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'pg',
@@ -15,37 +13,33 @@ const config: { [key: string]: Knex.Config } = {
   },
 
   staging: {
-    client: "postgresql",
-    connection: {
-      database: "my_db",
-      user: "username",
-      password: "password"
-    },
+    client: "pg",
+    connection: process.env.DATABASE_URL, // Use env var here too
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: "knex_migrations"
-    }
+      directory: './migrations',
+      extension: 'ts',
+    },
   },
 
   production: {
-    client: "postgresql",
+    client: "pg",
     connection: {
-      database: "my_db",
-      user: "username",
-      password: "password"
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false } // required by Neon
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: "knex_migrations"
-    }
-  }
-
+      directory: './migrations',
+      extension: 'ts',
+    },
+  },
 };
 
 export default config;
