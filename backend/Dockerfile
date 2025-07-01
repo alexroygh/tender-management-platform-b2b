@@ -21,4 +21,4 @@ RUN npm run build || true
 EXPOSE 4000
 
 # Default command: wait for db, run migrations & seeds, then start server
-CMD sh -c "until nc -z \$DB_HOST \$DB_PORT; do echo 'Waiting for DB...'; sleep 1; done && npx knex migrate:latest --knexfile knexfile.ts && npx knex seed:run --knexfile knexfile.ts && npm run dev"
+CMD sh -c "npx knex migrate:latest --env production && npx knex seed:run --env production && npm run dev"
