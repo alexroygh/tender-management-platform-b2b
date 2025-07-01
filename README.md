@@ -17,6 +17,24 @@ A robust B2B tender-management platform where companies can:
 - **Auth:** JWT (stateless, secure)
 - **Monorepo:** Single repo for frontend, backend, db, and docs
 
+## Test Users
+
+The following test users are seeded in the database and can be used for demo and testing purposes:
+
+- **user1@example.com** / password
+- **user2@example.com** / password
+- **user3@example.com** / password
+- **user4@example.com** / password
+- **user5@example.com** / password
+- **user6@example.com** / password
+- **user7@example.com** / password
+- **user8@example.com** / password
+- **user9@example.com** / password
+- **user10@example.com** / password
+
+Feel free to sign up with your own email as well. These accounts can be used to log in and explore the platform features.
+
+---
 ## Monorepo Structure
 ```
 frontend/   # Next.js app (UI, SSR/SSG, MUI)
@@ -174,7 +192,35 @@ docker-compose up
 
 ## Deliverables
 - [x] Frontend and backend folders
-- [x] TypeScript throughout
 - [x] Database schema (migrations/ERD)
 - [x] Architecture overview
-- [x] Deployed demo link (add yours here) 
+- [x] Deployed demo links: Frontend: https://tender-management-platform-b2b.vercel.app, Backend: https://tender-management-platform-b2b.onrender.com
+
+
+
+## Deployment Overview
+
+This project is deployed using the following services:
+
+- **Database:** [Neon](https://neon.tech/) (Postgres as a Service)
+- **Backend:** [Render](https://render.com/) (Node.js/Express API)
+- **Frontend:** [Vercel](https://vercel.com/) (Next.js React App)
+
+---
+
+### Database: Neon
+- The Postgres database is hosted on [Neon](https://neon.tech/).
+- We can manage database, users, and connection strings from the Neon dashboard.
+- Update backend `.env` or environment variables with the Neon connection string (e.g., `DATABASE_URL`).
+
+### Backend: Render
+- The backend (Node.js/Express) is deployed on [Render](https://render.com/).
+- Configure Render service to use the Neon `DATABASE_URL` and any other required environment variables (e.g., `SUPABASE_URL`, `SUPABASE_KEY`).
+- Make sure backend is set to build and run using the correct `start` script and that migrations are run on deploy.
+
+### Frontend: Vercel
+- The frontend (Next.js) is deployed on [Vercel](https://vercel.com/).
+- Set the environment variable `NEXT_PUBLIC_API_URL` to Render backend URL (e.g., `https://tender-management-platform-b2b.onrender.com`).
+- Vercel will handle builds and deployments automatically from the GitHub repo.
+
+---
