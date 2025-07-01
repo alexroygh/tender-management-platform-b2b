@@ -14,8 +14,9 @@
 5. **User-Company Mapping**: Users are mapped to companies via the `user_company_map` table (many-to-many support).
 
 ## Storage Integration
-- **Supabase Storage** is used for company logos/images.
-- Backend uses `@supabase/supabase-js` to upload and retrieve image URLs.
+- **Neon Postgres** is used for all structured data: users, companies, tenders, applications, and all business logic data.
+- **Supabase Storage** is used only for company logos/images (file uploads).
+- Backend uses `@supabase/supabase-js` to upload and retrieve image URLs from Supabase Storage.
 - Logo URLs are constructed dynamically from Supabase; not stored in the DB.
 - Credentials for Supabase are stored in backend `.env` file.
 - **Row Level Security (RLS)** is enabled on Supabase Storage; policies must allow authenticated uploads/reads.
@@ -29,12 +30,24 @@
 ## Example Endpoint Structure
 - `POST /api/auth/signup` — Register new user
 - `POST /api/auth/login` — Login and receive JWT
+
 - `GET /api/companies/:id` — Get company profile
-- `POST /api/companies` — Create/update company profile
+- `GET /api/companies/me` — Get current user's company profile
+- `POST /api/companies` — Create or update company profile
 - `POST /api/companies/:id/logo` — Upload company logo (Supabase)
+- `DELETE /api/companies/:id` — Delete company
+
 - `GET /api/tenders` — List all tenders (paginated)
+- `GET /api/tenders/:id` — Get tender details
+- `GET /api/tenders/company/:companyId` — List tenders for a company
 - `POST /api/tenders` — Create tender
+- `PUT /api/tenders/:id` — Update tender
+- `DELETE /api/tenders/:id` — Delete tender
+
 - `POST /api/applications` — Apply to tender
+- `GET /api/applications/tender/:tenderId` — Get all applications for a tender
+- `GET /api/applications/company/:companyId` — Get all applications for a company
+
 - `GET /api/search/companies` — Search companies by name, industry, or products/services
 
 ## Security
@@ -45,4 +58,47 @@
 
 ## Troubleshooting
 - **Supabase RLS errors**: Check your storage policies if uploads fail.
-- **PayloadTooLargeError**: Increase Express JSON body limit if uploading images. 
+- **PayloadTooLargeError**: Increase Express JSON body limit if uploading images.
+
+## User Authentication & SSR Sequence
+
+The following diagram illustrates the user login, cookie-based JWT auth, and SSR flow for protected pages:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant Vercel_Frontend
+    participant Render_Backend
+    participant Neon_DB
+
+    User->>Browser: Visit /login
+    Browser->>Vercel_Frontend: GET /login
+    Vercel_Frontend-->>Browser: Render login page
+
+    User->>Browser: Submit login form
+    Browser->>Vercel_Frontend: POST /api/auth/login (email, password)
+    Vercel_Frontend->>Render_Backend: POST /api/auth/login
+    Render_Backend->>Neon_DB: Validate user, check password
+    Neon_DB-->>Render_Backend: User data
+    Render_Backend-->>Vercel_Frontend: JWT token
+    Vercel_Frontend-->>Browser: Set cookie (token=JWT)
+    Browser->>Browser: Store token cookie
+    Browser->>Vercel_Frontend: Redirect to /dashboard
+
+    Browser->>Vercel_Frontend: GET /dashboard (with cookie)
+    Vercel_Frontend->>Render_Backend: GET /api/companies/me (Authorization: Bearer JWT)
+    Render_Backend->>Neon_DB: Fetch company data
+    Neon_DB-->>Render_Backend: Company data
+    Render_Backend-->>Vercel_Frontend: Company data
+    Vercel_Frontend-->>Browser: Render dashboard (SSR)
+
+    User->>Browser: Click logout
+    Browser->>Browser: Remove token cookie
+    Browser->>Vercel_Frontend: Redirect to /login
+```
+
+**Key Points:**
+- JWT is stored as a cookie and used for SSR and API calls.
+- All protected pages use SSR (`getServerSideProps`) to check auth and fetch data.
+- Data is always fetched server-side for protected pages, ensuring security and up-to-date content. 
