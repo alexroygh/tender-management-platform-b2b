@@ -1,4 +1,15 @@
-# B2B Tender Management Platform
+# Kibou B2B Tender Management Platform
+
+## Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Deliverables](#deliverables)
+- [Test Users](#test-users)
+- [Monorepo Structure](#monorepo-structure)
+- [Deployment Overview](#deployment-overview)
+- [Documentation](#documentation)
+  - [Architecture overview](./ARCHITECTURE.md)
+  - [Entity Relationship Diagram](./ERD.md)
 
 ## Overview
 A robust B2B tender-management platform where companies can:
