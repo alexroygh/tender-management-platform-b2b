@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { AppProps } from 'next/app';
-import { ThemeProvider, CssBaseline, createTheme, AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { ThemeProvider, CssBaseline, createTheme, AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { useRouter } from 'next/router';
 
 const theme = createTheme({

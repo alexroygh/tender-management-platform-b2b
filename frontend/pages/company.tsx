@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import {
   Container,
   Card,
@@ -13,12 +12,20 @@ import {
   Stack,
   Alert
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import UploadIcon from '@mui/icons-material/Upload';
 
+interface Company {
+  id: number;
+  name: string;
+  industry: string;
+  description: string;
+  goods_and_services: string[];
+  logo_url?: string;
+}
+
 export default function Company() {
-  const [company, setCompany] = useState<any>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [name, setName] = useState('');
   const [industry, setIndustry] = useState('');
   const [description, setDescription] = useState('');
@@ -27,14 +34,13 @@ export default function Company() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
 
   useEffect(() => {
     fetch('/api/companies/me', {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
       .then(res => res.json())
-      .then(data => {
+      .then((data: Company) => {
         setCompany(data);
         setName(data.name || '');
         setIndustry(data.industry || '');
@@ -60,13 +66,13 @@ export default function Company() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
       body: JSON.stringify({ name, industry, description, goods_and_services: goodsArr }),
     });
-    const data = await res.json();
+    const data: Company = await res.json();
     if (res.ok) {
       setSuccess('Company profile updated!');
       setCompany(data);
-      setLogoUrl(data.logo_url);
+      setLogoUrl(data.logo_url ?? '');
     } else {
-      setError(data.message || 'Failed to update company');
+      setError((data as unknown as { message?: string })?.message ?? 'Failed to update company');
     }
   };
 
@@ -79,7 +85,7 @@ export default function Company() {
   const handleLogoUpload = async () => {
     setError('');
     setSuccess('');
-    if (!logoFile) return;
+    if (!logoFile || !company) return;
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = (reader.result as string).split(',')[1];
@@ -88,12 +94,12 @@ export default function Company() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({ image: base64 }),
       });
-      const data = await res.json();
+      const data: Company = await res.json();
       if (res.ok) {
-        setLogoUrl(data.logo_url);
+        setLogoUrl(data.logo_url ?? '');
         setSuccess('Logo uploaded!');
       } else {
-        setError(data.message || 'Failed to upload logo');
+        setError((data as unknown as { message?: string })?.message ?? 'Failed to upload logo');
       }
     };
     reader.readAsDataURL(logoFile);

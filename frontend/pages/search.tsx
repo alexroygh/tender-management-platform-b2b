@@ -9,10 +9,10 @@ import {
   TextField,
   Button,
   Box,
-  Grid,
   Alert,
   InputAdornment
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import SearchIcon from '@mui/icons-material/Search';
 
 type Company = {
@@ -87,10 +87,10 @@ export default function Search({ initialResults, error }: SearchProps) {
       </Card>
       <Grid container spacing={2}>
         {results.length === 0 ? (
-          <Grid item xs={12}><Typography>No companies found.</Typography></Grid>
+          <Grid ><Typography>No companies found.</Typography></Grid>
         ) : (
           results.map((c: Company) => (
-            <Grid item xs={12} sm={6} md={4} key={c.id}>
+            <Grid key={c.id}>
               <Card>
                 <CardContent>
                   <Typography variant="h6">{c.name}</Typography>
@@ -135,7 +135,7 @@ export const getServerSideProps: GetServerSideProps<SearchProps> = async (ctx) =
     });
     const initialResults = await res.json();
     return { props: { initialResults } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred', initialResults: [] } };
   }
 };

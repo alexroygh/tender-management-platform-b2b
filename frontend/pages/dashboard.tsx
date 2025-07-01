@@ -17,7 +17,31 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
-export default function Dashboard({ company, tenders, error }: any) {
+interface Company {
+  id: number;
+  name: string;
+  industry: string;
+  description: string;
+  goods_and_services: string[];
+  logo_url?: string;
+}
+
+interface Tender {
+  id: number;
+  title: string;
+  description: string;
+  deadline: string;
+  budget: number;
+  company_id: number;
+}
+
+interface DashboardProps {
+  company?: Company;
+  tenders: Tender[];
+  error?: string;
+}
+
+export default function Dashboard({ company, tenders, error }: DashboardProps) {
   if (error) return <Container sx={{ mt: 8 }}><Typography color="error">{error}</Typography></Container>;
   if (!company) return <Container sx={{ mt: 8 }}><Typography>Loading...</Typography></Container>;
   return (
@@ -28,10 +52,10 @@ export default function Dashboard({ company, tenders, error }: any) {
         <Card sx={{ mb: 4 }}>
           <CardContent>
             <Grid container spacing={2} alignItems="center">
-              <Grid item>
+              <Grid>
                 <Avatar src={company.logo_url} alt="Logo" sx={{ width: 80, height: 80 }} />
               </Grid>
-              <Grid item xs={12}>
+              <Grid>
                 <Typography variant="h6">{company.name}</Typography>
                 <Typography color="text.secondary">{company.industry}</Typography>
                 <Typography sx={{ mt: 1 }}>{company.description}</Typography>
@@ -57,10 +81,10 @@ export default function Dashboard({ company, tenders, error }: any) {
         </Box>
         <Grid container spacing={2}>
           {tenders.length === 0 ? (
-            <Grid item xs={12}><Typography>No tenders found for your company.</Typography></Grid>
+            <Grid><Typography>No tenders found for your company.</Typography></Grid>
           ) : (
-            tenders.map((t: any) => (
-              <Grid item xs={12} sm={6} md={4} key={t.id}>
+            tenders.map((t: Tender) => (
+              <Grid key={t.id}>
                 <Card>
                   <CardContent>
                     <Typography variant="subtitle1" fontWeight={600}>{t.title}</Typography>
@@ -76,7 +100,7 @@ export default function Dashboard({ company, tenders, error }: any) {
   );
 }
 
-function decodeJwt(token: string): any {
+function decodeJwt(token: string): Record<string, unknown> | null {
   try {
     const payload = token.split('.')[1];
     return JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
@@ -85,7 +109,7 @@ function decodeJwt(token: string): any {
   }
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<DashboardProps> = async (ctx) => {
   const cookies = parseCookies(ctx.req.headers.cookie);
   const token = cookies.token;
   if (!token) {
@@ -101,7 +125,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const decoded = decodeJwt(token);
     const userId = decoded?.userId;
     if (!userId) {
-      return { props: { error: 'Invalid token' } };
+      return { props: { error: 'Invalid token', tenders: [] } };
     }
     // Fetch company by user id
     const companyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/companies/me`, {
@@ -111,9 +135,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       const text = await companyRes.text();
       throw new Error(`Failed to fetch company: ${companyRes.status} ${text}`);
     }
-    const company = await companyRes.json();
+    const company: Company = await companyRes.json();
     if (!company.id) {
-      return { props: { error: 'No company found for user' } };
+      return { props: { error: 'No company found for user', tenders: [] } };
     }
     // Fetch all tenders for this company
     const tendersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/tenders/company/${company.id}`, {
@@ -123,9 +147,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       const text = await tendersRes.text();
       throw new Error(`Failed to fetch tenders: ${tendersRes.status} ${text}`);
     }
-    const tenders = await tendersRes.json();
+    const tenders: Tender[] = await tendersRes.json();
     return { props: { company, tenders } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred', tenders: [] } };
   }
 };

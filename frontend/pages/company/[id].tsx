@@ -1,5 +1,4 @@
 import { GetServerSideProps } from 'next';
-import { useRouter } from 'next/router';
 import {
   Container,
   Card,
@@ -12,8 +11,21 @@ import {
   Button
 } from '@mui/material';
 
-export default function PublicCompanyProfile({ company, error }: any) {
-  const router = useRouter();
+interface Company {
+  id: number;
+  name: string;
+  industry: string;
+  description: string;
+  goods_and_services: string[];
+  logo_url?: string;
+}
+
+interface PublicCompanyProfileProps {
+  company?: Company;
+  error?: string;
+}
+
+export default function PublicCompanyProfile({ company, error }: PublicCompanyProfileProps) {
   if (error) return (
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Alert severity="error">{error}</Alert>
@@ -52,7 +64,7 @@ export default function PublicCompanyProfile({ company, error }: any) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<PublicCompanyProfileProps> = async (ctx) => {
   const { id } = ctx.query;
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/companies/${id}`);
@@ -60,9 +72,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       const data = await res.json();
       return { props: { error: data.message || 'Company not found' } };
     }
-    const company = await res.json();
+    const company: Company = await res.json();
     return { props: { company } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred' } };
   }
 }; 

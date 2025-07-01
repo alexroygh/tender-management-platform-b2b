@@ -73,7 +73,7 @@ export const getServerSideProps: GetServerSideProps<TenderDetailsProps> = async 
     }
     const tender = await res.json();
     return { props: { tender } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred' } };
   }
 }; 

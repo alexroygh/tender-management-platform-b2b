@@ -7,9 +7,9 @@ import {
   TextField,
   Button,
   Box,
-  Grid,
   Alert
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import AddIcon from '@mui/icons-material/Add';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from '../utils/parseCookies';
@@ -93,12 +93,12 @@ export default function Tenders() {
       </Card>
       <Grid container spacing={2}>
         {loading ? (
-          <Grid item xs={12}><Typography>Loading...</Typography></Grid>
+          <Grid ><Typography>Loading...</Typography></Grid>
         ) : tenders.length === 0 ? (
-          <Grid item xs={12}><Typography>No tenders found.</Typography></Grid>
+          <Grid><Typography>No tenders found.</Typography></Grid>
         ) : (
           tenders.map((t: Tender) => (
-            <Grid item xs={12} sm={6} md={4} key={t.id}>
+            <Grid key={t.id}>
               <Card>
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight={600}>{t.title}</Typography>
@@ -133,8 +133,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
   try {
     // SSR will just return an empty list, client will fetch paginated
-    return { props: { initialTenders: [] } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+    return { props: { error: null, initialTenders: [] } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred', initialTenders: [] } };
   }
 };

@@ -4,19 +4,23 @@ import {
   Card,
   CardContent,
   Typography,
-  Button,
-  Box,
-  Grid,
   Alert
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from '../utils/parseCookies';
-import { useRouter } from 'next/router';
+
+type Application = {
+  id: number;
+  tender_id: number;
+  tender_title?: string;
+  proposal: string;
+  company_id: number;
+};
 
 export default function Applications() {
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [error, setError] = useState('');
-  const router = useRouter();
 
   useEffect(() => {
     fetch('/api/applications')
@@ -31,10 +35,10 @@ export default function Applications() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Grid container spacing={2}>
         {applications.length === 0 ? (
-          <Grid item xs={12}><Typography>No applications found.</Typography></Grid>
+          <Grid><Typography>No applications found.</Typography></Grid>
         ) : (
-          applications.map((app: any) => (
-            <Grid item xs={12} sm={6} md={4} key={app.id}>
+          applications.map((app: Application) => (
+            <Grid key={app.id}>
               <Card>
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight={600}>Tender: {app.tender_title || app.tender_id}</Typography>
@@ -71,7 +75,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     });
     const applications = await res.json();
     return { props: { applications } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred' } };
   }
 }; 

@@ -16,7 +16,20 @@ import {
 } from '@mui/material';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
-export default function AppliedTenders({ applications, error }: any) {
+type Application = {
+  id: number;
+  tender_id: number;
+  tender_title: string;
+  tender_deadline: string;
+  proposal: string;
+};
+
+interface AppliedTendersProps {
+  applications?: Application[];
+  error?: string;
+}
+
+export default function AppliedTenders({ applications, error }: AppliedTendersProps) {
   if (error) return (
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Alert severity="error">{error}</Alert>
@@ -43,7 +56,7 @@ export default function AppliedTenders({ applications, error }: any) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {applications.map((app: any) => (
+              {applications.map((app: Application) => (
                 <TableRow key={app.id}>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
@@ -103,7 +116,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     }
     const applications = await appsRes.json();
     return { props: { applications } };
-  } catch (err: any) {
-    return { props: { error: err.message } };
+  } catch (err: unknown) {
+    return { props: { error: err instanceof Error ? err.message : 'An error occurred' } };
   }
 }; 
